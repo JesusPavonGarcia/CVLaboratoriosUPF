@@ -90,28 +90,28 @@ def color_to_bw_and_reduce(input_path,output_path,lvl_compression, width, height
 def main():
 
     input_video_path = "Big_Buck_Bunny_720_10s_20MB.mp4"  # Replace with your input video file
-    parse_video_info(input_video_path, "video_info_original.txt")
+    parse_video_info(input_video_path, "text/video_info_original.txt")
 
     # Call ex1
     # Convierte a mp2 y genera archivo de texto con la info
-    output_video_path = "/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/Big_Buck_Bunny_conversion.mpg"
+    output_video_path = "/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/video/Big_Buck_Bunny_conversion.mpg"
     convert_to_mp2(input_video_path, output_video_path)
-    parse_video_info(output_video_path, "video_info_mp2.txt")
+    parse_video_info(output_video_path, "text/video_info_mp2.txt")
 
     # Call ex2
     # Cambia la resolución y genera archivo de texto con la info
-    output_video_path_resolution = "/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/Big_Buck_Bunny_modified_res.mp4"
+    output_video_path_resolution = "/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/video/Big_Buck_Bunny_modified_res.mp4"
     new_resolution = "854:480"  # or # "2560:1440"
     modify_resolution(input_video_path, output_video_path_resolution, new_resolution)
-    parse_video_info(output_video_path_resolution, "video_info_modified_res.txt")
+    parse_video_info(output_video_path_resolution, "text/video_info_modified_res.txt")
 
     # Call ex3
     # Cambia el chroma subsampling y genera archivo de texto con la info
     output_video_path_changed_subsampling = \
-        "/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/Big_Buck_Bunny_changeg_subsampling.mp4"
+        "/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/video/Big_Buck_Bunny_changeg_subsampling.mp4"
     new_subsampling = "yuv444p"
     change_chroma_subsampling(input_video_path, output_video_path_changed_subsampling, new_subsampling)
-    parse_video_info(output_video_path_changed_subsampling, "video_info_subsampling.txt")
+    parse_video_info(output_video_path_changed_subsampling, "text/video_info_subsampling.txt")
 
     # Call ex4
     # Print en terminal wsl diferente info relevante de los videos generados
@@ -122,9 +122,9 @@ def main():
 
     # Call ex5
     # Convierte video a bw , reduce resolución y genera archivo de texto con la info
-    output_video_path_bw = "/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/Big_Buck_Bunny_bw.mp4"
+    output_video_path_bw = "/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/video/Big_Buck_Bunny_bw.mp4"
     color_to_bw_and_reduce(input_video_path, output_video_path_bw, 20, 640, 360)
-    parse_video_info(output_video_path_bw, "video_info_bw_reduce.txt")
+    parse_video_info(output_video_path_bw, "text/video_info_bw_reduce.txt")
 
 
 if __name__ == "__main__":

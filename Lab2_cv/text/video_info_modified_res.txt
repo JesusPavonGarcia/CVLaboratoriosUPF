@@ -9,7 +9,7 @@ ffmpeg version 4.4.2-0ubuntu0.22.04.1 Copyright (c) 2000-2021 the FFmpeg develop
   libswscale      5.  9.100 /  5.  9.100
   libswresample   3.  9.100 /  3.  9.100
   libpostproc    55.  9.100 / 55.  9.100
-Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/Big_Buck_Bunny_modified_res.mp4':
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/video/Big_Buck_Bunny_modified_res.mp4':
   Metadata:
     major_brand     : isom
     minor_version   : 512

@@ -9,20 +9,9 @@ ffmpeg version 4.4.2-0ubuntu0.22.04.1 Copyright (c) 2000-2021 the FFmpeg develop
   libswscale      5.  9.100 /  5.  9.100
   libswresample   3.  9.100 /  3.  9.100
   libpostproc    55.  9.100 / 55.  9.100
-Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/Big_Buck_Bunny_bw.mp4':
-  Metadata:
-    major_brand     : isom
-    minor_version   : 512
-    compatible_brands: isomiso2avc1mp41
-    title           : Big Buck Bunny, Sunflower version
-    artist          : Blender Foundation 2008, Janus Bager Kristensen 2013
-    composer        : Sacha Goedegebure
-    encoder         : Lavf58.76.100
-    comment         : Creative Commons Attribution 3.0 - http://bbb3d.renderfarming.net
-    genre           : Animation
-  Duration: 00:00:10.00, start: 0.000000, bitrate: 856 kb/s
-  Stream #0:0(und): Video: h264 (High) (avc1 / 0x31637661), yuvj420p(pc), 640x360 [SAR 1:1 DAR 16:9], 852 kb/s, 30 fps, 30 tbr, 15360 tbn, 60 tbc (default)
-    Metadata:
-      handler_name    : VideoHandler
-      vendor_id       : [0][0][0][0]
+Input #0, mpeg, from '/mnt/c/codificacion_video/CVLaboratoriosUPF/Lab2_cv/video/Big_Buck_Bunny_conversion.mpg':
+  Duration: 00:00:10.00, start: 0.533333, bitrate: 1553 kb/s
+  Stream #0:0[0x1e0]: Video: mpeg2video (Main), yuv420p(tv, progressive), 1280x720 [SAR 1:1 DAR 16:9], 30 fps, 30 tbr, 90k tbn, 60 tbc
+    Side data:
+      cpb: bitrate max/min/avg: 0/0/0 buffer size: 49152 vbv_delay: N/A
 At least one output file must be specified
