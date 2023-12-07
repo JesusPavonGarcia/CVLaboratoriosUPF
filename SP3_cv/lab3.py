@@ -65,6 +65,8 @@ class VideoConverter:
 
 
 def main():
+
+    #Exercise 1
     input_path = "/mnt/c/codificacion_video/cvlaboratoriosupf/sp3_cv/Big_Buck_Bunny_720_10s_20MB.mp4"
     formats = ["vp9", "vp8", "h265", "av1"]
     resolutions = ["854:480", "1280:720", "360:240", "160:120"]
@@ -81,9 +83,13 @@ def main():
     video2 = VideoConverter(input_path, resolutions[1], formats[1])
     #input_path_3 = video2.process_video()
 
+
+    #Exercise 2
     input_path_4 = modify_format(input_path, formats[1])
     input_path_5 = modify_format(input_path, formats[0])
-    output_file = f"{input_path_4[:-4]}_divide_screen.webm"
+
+
+    output_file = f"{input_path_4[:-4]}_divide_screen.mp4"
 
     output_file = compare.videos_comparision(input_path_4, input_path_5, output_file)
 
