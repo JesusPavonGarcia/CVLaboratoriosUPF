@@ -1,6 +1,7 @@
 import subprocess
 import os
 import json
+import random
 import shutil
 
 
@@ -23,9 +24,8 @@ def encoding_ladder(input_file, threshold_bitrate, output_file):
     res, codec, bitrate = get_video_info(input_file)
     bitrate = int(bitrate)
 
-
     parse_video_info(input_file, "text/video_info_original.txt")
-
+    print(f"{threshold_bitrate}")
     if bitrate > threshold_bitrate:
         if bitrate >= 2*threshold_bitrate:
             new_res = f"{int(res[0]/2)}x{int(res[1]/2)}"
@@ -35,6 +35,15 @@ def encoding_ladder(input_file, threshold_bitrate, output_file):
                     new_res = f"{int(res[0] / 8)}x{int(res[1] / 8)}"
                     if bitrate >= 16*threshold_bitrate:
                         new_res = f"{int(res[0] / 16)}x{int(res[1] / 16)}"
+    elif bitrate < threshold_bitrate:
+        if 2*bitrate <= threshold_bitrate:
+            new_res = f"{int(res[0]*2)}x{int(res[1]*2)}"
+            if 4*bitrate <= threshold_bitrate:
+                new_res = f"{int(res[0] * 4)}x{int(res[1] * 4)}"
+                if 8*bitrate <= threshold_bitrate:
+                    new_res = f"{int(res[0] * 8)}x{int(res[1] * 8)}"
+                    if 16*bitrate <= threshold_bitrate:
+                        new_res = f"{int(res[0] * 16)}x{int(res[1] * 16)}"
     else:
         new_res = f"{int(res[0])}x{int(res[1])}"
 
@@ -88,4 +97,22 @@ def encoding_video(input_file, output_file, new_resolution, codec, video_bitrate
     # Modifica resolución de video con ffmpeg, estableciendo un rango de bitrate y sobrescribe sin confirmación
     cmd = f"ffmpeg -y -i {input_file} -b:v {video_bitrate} -vf scale={new_resolution} -c:v {codec} {output_file}"
     subprocess.call(cmd, shell=True)
+
+
+def get_random_bitrate(input_file):
+    new_bitrate = 0
+    try:
+        resolution, codec, bitrate = get_video_info(input_file)
+
+        if bitrate is not None:
+            # Generar un bitrate aleatorio
+            options = [0.5, 0.25, 0.125, 0.0625, 1, 2, 4, 8]  # Múltiplos de bitrate original
+            multiplier = random.choice(options)
+            new_bitrate = int(int(bitrate) * multiplier)
+            return new_bitrate
+        else:
+            new_bitrate = 0
+    except Exception as e:
+        print(f"Error obteniendo el bitrate del video: {str(e)}")
+        return new_bitrate
 

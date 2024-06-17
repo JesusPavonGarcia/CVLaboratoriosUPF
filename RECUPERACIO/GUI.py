@@ -3,8 +3,13 @@ from tkinter import filedialog, ttk
 from PIL import Image, ImageTk
 import cv2
 from threading import Thread
-import random
+import requests
 import lab_recu
+import subprocess
+import shutil
+import threading
+import os
+import signal
 
 
 class VideoApp:
@@ -14,17 +19,18 @@ class VideoApp:
 
         # Variables
         self.video_path = tk.StringVar()
-        self.bitrate_aleatorio = tk.StringVar()
+        self.out_video_path = tk.StringVar()
+        self.bitrate_aleatorio = tk.IntVar()
         self.current_color_sub = tk.StringVar()
 
         self.original_bitrate = None
         self.chroma_subsampling = ['yuv444p', 'yuv422p', 'yuv420p']
         self.current_subsampling_index = 0
-        self.out_video_path = "temp.mp4"
         # Layout
         self.create_widgets()
         self.cap = None
         self.process_thread = None
+        self.process_lock = threading.Lock()  # Crear un bloqueo
 
     def create_widgets(self):
         # Title and description
@@ -57,7 +63,7 @@ class VideoApp:
         self.video_label.grid(row=4, column=0, columnspan=3, padx=10, pady=10)
 
         # Bitrate aleatorio
-        ttk.Label(self.root, text="(Bandwith) Bitrate Aleatorio:").grid(row=5, column=0, padx=10, pady=10)
+        ttk.Label(self.root, text="(Bandwith) Bitrate Aleatorio: [bps]").grid(row=5, column=0, padx=10, pady=10)
         ttk.Label(self.root, textvariable=self.bitrate_aleatorio).grid(row=5, column=1, padx=10, pady=10)
 
         # Select random bitrate
@@ -79,16 +85,41 @@ class VideoApp:
             self.display_metadata(file_path)
             self.play_video(file_path)
 
-    def display_metadata(self, file_path):
+    def upload_video(self,file_path):
+        bitrate = self.bitrate_aleatorio.get()
+        if not file_path:
+            return
+
         try:
-            resolution,codec,bitrate = lab_recu.get_video_info(file_path)
-            metadata = (f"Bit Rate: {bitrate}\nCodec: {codec}\nResolution: {resolution[0]}x{resolution[1]} "
-                        f"\nChroma Subsampling: {self.chroma_subsampling[self.current_subsampling_index]}")
-            self.metadata_text.delete(1.0, tk.END)
-            self.metadata_text.insert(tk.END, metadata)
+            with open(file_path, 'rb') as f:
+                response = requests.post('http://127.0.0.1:5001/process_video', files={'video': f}, data={'bitrate': bitrate})
+
+            if response.status_code == 200:
+                output_path = "./temp.mp4"
+                #with open(output_path, 'wb') as f:
+                    #self.write(response.content)
+                self.play_video(output_path)
+                self.display_metadata(output_path)
+                self.video_path.set(output_path)
+            else:
+                print(f"Failed to process video")
         except Exception as e:
-            self.metadata_text.delete(1.0, tk.END)
-            self.metadata_text.insert(tk.END, f"Error obteniendo metadatos: {str(e)}")
+            print(f"An error occurred: {e}")
+
+    def display_metadata(self, file_path):
+        if file_path is not None:
+            try:
+                print(f" path es: {self.video_path.get()}")
+                resolution,codec,bitrate = lab_recu.get_video_info(self.video_path.get())
+                #resolution, codec, bitrate = lab_recu.get_video_info(file_path)
+                metadata = (f"Bit Rate: {bitrate}\nCodec: {codec}\nResolution: {resolution[0]}x{resolution[1]} "
+                            f"\nChroma Subsampling: {self.chroma_subsampling[self.current_subsampling_index]}")
+                self.metadata_text.delete(1.0, tk.END)
+                self.metadata_text.insert(tk.END, metadata)
+                #self.out_video_path = self.video_path
+            except Exception as e:
+                self.metadata_text.delete(1.0, tk.END)
+                self.metadata_text.insert(tk.END, f"Error obteniendo metadatos: {str(e)}")
 
     def play_video(self, file_path):
         self.cap = cv2.VideoCapture(file_path)
@@ -109,16 +140,10 @@ class VideoApp:
 
     def select_random_bitrate(self):
         try:
-            resolution,codec,bitrate = lab_recu.get_video_info(self.video_path.get())
+            # Generar un bitrate aleatorio
+            new_bitrate = lab_recu.get_random_bitrate(self.video_path.get())
+            self.bitrate_aleatorio.set(int(new_bitrate))
 
-            if bitrate is not None:
-                # Generar un bitrate aleatorio
-                options = [0.5, 0.25, 0.125, 0.0625, 1, 2]  # Múltiplos de bitrate original
-                multiplier = random.choice(options)
-                new_bitrate = int(int(bitrate) * multiplier)
-                self.bitrate_aleatorio.set(f"{new_bitrate} bps")
-            else:
-                self.bitrate_aleatorio.set("N/A")
         except Exception as e:
             print(f"Error obteniendo el bitrate del video: {str(e)}")
             return None
@@ -127,7 +152,7 @@ class VideoApp:
         if self.video_path.get():
             self.current_subsampling_index = (self.current_subsampling_index + 1) % len(self.chroma_subsampling)
             subsampling = self.chroma_subsampling[self.current_subsampling_index]
-            lab_recu.change_chroma_subsampling(self.video_path.get(), self.out_video_path, subsampling)
+            lab_recu.change_chroma_subsampling(self.video_path.get(), str(self.out_video_path.get()), subsampling)
             self.current_color_sub.set(f"{subsampling} ")
         else:
             print("Por favor, seleccione un archivo de video primero.")
@@ -139,19 +164,34 @@ class VideoApp:
             self.process_thread.start()
 
     def run_encoding_process(self):
-        if self.bitrate_aleatorio.get():
-            # Llamar a la función encoding_ladder del archivo lab_recu.py
-            output_video_path = "temp.mp4"
-            self.out_video_path = output_video_path
-            lab_recu.encoding_ladder(self.video_path.get(), int(self.bitrate_aleatorio.get().split()[0]),
-                                     output_video_path)
-            self.display_metadata(output_video_path)
+        # Llamar a la función encoding_ladder del archivo lab_recu.py
+        #if self.bitrate_aleatorio.get():
+        output_video_path = "./temp2.mp4"
+        self.out_video_path.set(output_video_path)
+            #self.upload_video()
+            #self.video_path.set(self.out_video_path.get())
+            # lab_recu.encoding_ladder(self.video_path.get(), int(self.bitrate_aleatorio.get().split()[0]),
+                                     # output_video_path)
+        if self.video_path.get():
+            shutil.copy2(self.video_path.get(), self.out_video_path.get())
+            self.upload_video(self.out_video_path.get())
+            self.display_metadata(self.out_video_path.get())
             # Reproducir el video recodificado
-            self.cap = cv2.VideoCapture(output_video_path)
-            self.show_frame()
+            self.play_video(self.out_video_path.get())
+
+
+def run_flask_app():
+    subprocess.run(['python3', 'app.py'])
 
 
 if __name__ == "__main__":
+
+    flask_thread = Thread(target=run_flask_app)
+    flask_thread.start()
+
     root = tk.Tk()
     app = VideoApp(root)
     root.mainloop()
+
+    flask_thread.join()
+
