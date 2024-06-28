@@ -23,42 +23,40 @@ class VideoApp:
         self.create_widgets()
 
     def create_widgets(self):
-        # Title and description
+        # Título + descripción
         title_label = tk.Label(self.root, text="JESÚS PAVÓN GARCÍA - VIDEO ENCODING LADDER SIMULATOR",
                                font=("Helvetica", 16))
         title_label.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
 
-        # Video selection
+        # Selector de video
         ttk.Label(self.root, text="Seleccione archivo de video:").grid(row=1, column=0, padx=10, pady=10)
         ttk.Entry(self.root, textvariable=self.video_path, width=50).grid(row=1, column=1, padx=10, pady=10)
         ttk.Button(self.root, text="Seleccionar", command=self.select_video).grid(row=1, column=2, padx=10, pady=10)
 
-        # Bitrate entry
+        # Entrada bitrate
         ttk.Label(self.root, text="Bitrate (bps):").grid(row=2, column=0, padx=10, pady=10)
         ttk.Entry(self.root, textvariable=self.bitrate, width=20).grid(row=2, column=1, padx=10, pady=10)
 
-        # Chroma Subsampling entry
+        # Entrada Chroma Subsampling
         ttk.Label(self.root, text="Chroma Subsampling ['yuv422p','yuv420p','yuv444p']:").grid(row=3, column=0, padx=10, pady=10)
         ttk.Entry(self.root, textvariable=self.chroma_sub, width=20).grid(row=3, column=1, padx=10, pady=10)
 
-        # Iniciar proceso button
+        # Botón Iniciar proceso
         tk.Button(self.root, text="Iniciar Proceso", command=self.start_process).grid(row=4, column=2, padx=10, pady=10)
+
+        # Botón de salida
+        tk.Button(self.root, text="Salir", command=self.on_exit).grid(row=5, column=2, padx=10, pady=10)
 
     def select_video(self):
         file_path = filedialog.askopenfilename(filetypes=[("Video files", "*.mp4 *.avi *.mkv")])
         if file_path:
             self.video_path.set(file_path)
-            #self.process_video(file_path)
-            # Reproducir el video original
-            #play_video(file_path)
-            # Comenzar automáticamente el proceso de envío a la API después de mostrar los metadatos
-            #self.root.after(1000, lambda: self.process_video(file_path))
 
     def process_video(self, file_path):
         # Primero, aseguramos que Flask esté en ejecución
         start_flask_server()
 
-        #ej para test
+        #Get el bitrate y chroma_sub del usuario
         bitrate = int(self.bitrate.get())
         chroma_sub = self.chroma_sub.get()
 
@@ -100,7 +98,7 @@ class VideoApp:
                 codec, colorsubsampling, resolution, bitrate = self.read_metadata(metadata_full_path)
                 display_metadata(codec, colorsubsampling, resolution, bitrate, frame_proc, 'Processed')
 
-                #Play processed video
+                #Play processed y original video
                 #play_video(video_full_path, 'processed')
                 self.play_videos(file_path, video_full_path)
             else:
@@ -108,28 +106,31 @@ class VideoApp:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def read_metadata(self,metadata_txt_path):
+    def read_metadata(self, metadata_txt_path):
         codec = None
         resolution = None
         bitrate = None
         colorsubsampling = None
+
         with open(metadata_txt_path, 'r') as f:
             lines = f.readlines()
-            # Variables para almacenar la información
+            # Linia pattern que queremos identifcar
+            # r'Stream #\d+:\d+\(\w*\): Video: (\w+) \(.*\), (\w+), (\d+x\d+) \[.*\], (\d+) kb/s,.*')
             stream_pattern = re.compile(
-                r'Stream #\d+:\d+\(\w*\): Video: (\w+) \(.*\), (\w+), (\d+x\d+) \[.*\], (\d+) kb/s,.*')
+                r'Stream #\d+:\d+\(\w*\): Video: (\w+) \(.*\), (\w+), (\d+x\d+) \[.*\], (\d+) ?kb/s,.*')
 
             for line in lines:
                 # Buscar la línea que contiene la información del stream de video
                 stream_match = stream_pattern.search(line)
                 if stream_match:
+                    print("MATCH: datos del archivo coinciden con los datos solicitados.")
                     codec = stream_match.group(1)
                     colorsubsampling = stream_match.group(2)
                     resolution = stream_match.group(3)
                     bitrate = stream_match.group(4)
                     return codec, colorsubsampling, resolution, bitrate
                 else:
-                    print("Buscando datos del archivo que coincidan con los datos solicitados.")
+                    print(".")
 
     def play_videos(self, video_path1, video_path2):
         cap1 = cv2.VideoCapture(video_path1)
@@ -166,6 +167,10 @@ class VideoApp:
 
     def start_process(self):
         self.process_video(self.video_path.get())
+
+    def on_exit(self):
+        if messagebox.askokcancel("Salir", "¿Realmente quieres salir?"):
+            root.destroy()
 
 
 def display_metadata(codec, colorsubsampling, resolution, bitrate, frame, title):

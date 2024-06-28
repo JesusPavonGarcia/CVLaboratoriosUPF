@@ -9,9 +9,19 @@ ffmpeg version 4.4.2-0ubuntu0.22.04.1 Copyright (c) 2000-2021 the FFmpeg develop
   libswscale      5.  9.100 /  5.  9.100
   libswresample   3.  9.100 /  3.  9.100
   libpostproc    55.  9.100 / 55.  9.100
-[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5617c2ca2200] moov atom not found
-./processed_video.mp4: Invalid data found when processing input
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from './processed_video.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf58.76.100
+  Duration: 00:00:07.16, start: 0.000000, bitrate: 39 kb/s
+  Stream #0:0(und): Video: h264 (High 4:2:2) (avc1 / 0x31637661), yuv422p, 80x60 [SAR 1:1 DAR 4:3], 36 kb/s, 25 fps, 25 tbr, 12800 tbn, 50 tbc (default)
+    Metadata:
+      handler_name    : VideoHandler
+      vendor_id       : [0][0][0][0]
+At least one output file must be specified
 
- RES: []
- CODEC: 
- BITRATE: 
+ RES: [80, 60]
+ CODEC: h264
+ BITRATE: 36906

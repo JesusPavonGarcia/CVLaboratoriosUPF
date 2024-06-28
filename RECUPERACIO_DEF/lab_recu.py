@@ -35,14 +35,7 @@ def encoding_ladder(input_file, threshold_bitrate, output_file):
                 new_res = f"{int(res[0] / 4)}x{int(res[1] / 4)}"
                 if bitrate >= 8*threshold_bitrate:
                     new_res = f"{int(res[0] / 8)}x{int(res[1] / 8)}"
-    elif bitrate < threshold_bitrate:
-        if 2*bitrate <= threshold_bitrate:
-            new_res = f"{int(res[0]*2)}x{int(res[1]*2)}"
-            if 4*bitrate <= threshold_bitrate:
-                new_res = f"{int(res[0] * 4)}x{int(res[1] * 4)}"
-                if 8*bitrate <= threshold_bitrate:
-                    new_res = f"{int(res[0] * 8)}x{int(res[1] * 8)}"
-    else:
+    elif threshold_bitrate >= bitrate:
         new_res = f"{int(res[0])}x{int(res[1])}"
 
     try:
@@ -50,11 +43,10 @@ def encoding_ladder(input_file, threshold_bitrate, output_file):
             encoding_video(input_file, output_file, new_res, codec, bitrate)
         else:
             encoding_video(input_file, output_file, res, codec, bitrate)
-        #get_video_info(output_file)
-        #parse_video_info(output_file, "text/video_info_temp.txt")
+            #get_video_info(output_file)
+            #parse_video_info(output_file, "text/video_info_temp.txt")
     except Exception as e:
         print(f"Error en la codificación: {str(e)}")
-    print(f'\n\nRESOLUCTION     new ES {new_res}')
 
 
 def get_video_info(input_file):
